@@ -11,7 +11,7 @@ p2_table:
     resb 4096
 ;Reserving the stack
 stack_bottom:
-  resb 64
+  resb 4096 * 4
 stack_top:
 
 section .rodata
@@ -155,6 +155,8 @@ extern long_mode_start
 start:
     ;Setup stack
     mov esp, stack_top
+    ;Move multiboot info pointer into edi to pass it to main
+    mov edi, ebx
 
     call check_multiboot
     call check_cpuid

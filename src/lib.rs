@@ -9,6 +9,7 @@ extern crate volatile;
 
 #[macro_use]
 mod vga_buffer;
+mod memory;
 
 #[no_mangle]
 pub extern fn rust_main(multiboot_information_address: usize) {
@@ -16,12 +17,6 @@ pub extern fn rust_main(multiboot_information_address: usize) {
     println!("Welcome to Rust-Art!");
 
     let boot_info = unsafe { multiboot2::load(multiboot_information_address) };
-    print_info(&boot_info, multiboot_information_address);
-
-    loop{}
-}
-
-fn print_info(boot_info:&multiboot2::BootInformation, multiboot_information_address:usize) {
     let memory_map_tag = boot_info.memory_map_tag().expect("Memory map tag required");
     println!("memory areas:");
     for area in memory_map_tag.memory_areas() {
@@ -44,6 +39,20 @@ fn print_info(boot_info:&multiboot2::BootInformation, multiboot_information_addr
     println!("kernel_start:0x{:x}, kernel_end:0x{:x}", kernel_start, kernel_end);
     println!("multiboot_start:0x{:x}, multiboot_end:0x{:x}", multiboot_start, multiboot_end);
 
+    use::memory::FrameAllocator;
+    use::memory::AreaFrameAllocator;
+
+    let mut frame_allocator = memory::AreaFrameAllocator::new(
+        kernel_start as usize, kernel_end as usize, multiboot_start,
+        multiboot_end, memory_map_tag.memory_areas());
+
+    for i in 0.. {
+        if let None = frame_allocator.allocate_frame() {
+            println!("allocated {} frames", i);
+            break;
+        }
+    }
+    loop{}
 }
 
 #[lang = "eh_personality"] extern fn eh_personality() {}

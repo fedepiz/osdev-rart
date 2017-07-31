@@ -1,15 +1,19 @@
 #![feature(lang_items)]
 #![feature(unique)]
 #![feature(const_fn)]
+#![feature(asm)]
 #![no_std]
 extern crate rlibc;
+
+extern crate cpuio;
 extern crate multiboot2;
 extern crate spin;
 extern crate volatile;
 
+mod memory;
+mod pic;
 #[macro_use]
 mod vga_buffer;
-mod memory;
 
 #[no_mangle]
 pub extern fn rust_main(multiboot_information_address: usize) {
@@ -51,6 +55,10 @@ pub extern fn rust_main(multiboot_information_address: usize) {
             println!("allocated {} frames", i);
             break;
         }
+    }
+
+    unsafe {
+        pic::initialize();
     }
     loop{}
 }

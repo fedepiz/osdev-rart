@@ -1,0 +1,10 @@
+[package]
+name = "osdev-rart"
+version = "0.1.0"
+authors = ["Federico Pizzuti <federico.pizzuti@ed.ac.uk>"]
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "1.0"

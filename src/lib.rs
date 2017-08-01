@@ -4,6 +4,7 @@
 #![feature(asm)]
 #![feature(use_extern_macros)]
 #![feature(alloc)]
+#![feature(abi_x86_interrupt)]
 #![no_std]
 extern crate rlibc;
 
@@ -15,11 +16,14 @@ extern crate multiboot2;
 extern crate once;
 extern crate spin;
 extern crate volatile;
+#[macro_use]
 extern crate x86_64;
 
 //Allocator
 //extern crate bump_allocator;
 extern crate hole_list_allocator;
+#[macro_use]
+extern crate lazy_static;
 #[macro_use]
 extern crate alloc;
 
@@ -27,6 +31,8 @@ extern crate alloc;
 mod vga_buffer;
 mod memory;
 mod pic;
+mod interrupts;
+
 #[no_mangle]
 pub extern "C" fn rust_main(multiboot_information_address: usize) {
     vga_buffer::clear_screen();
@@ -43,12 +49,15 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     unsafe {
         pic::initialize();
     }
-    println!("Initialization completed");
 
     use alloc::boxed::Box;
     {
         let heap_test = Box::new(42);
     }
+
+    interrupts::init();
+
+    println!("Initialization completed");
     loop{}
 }
 

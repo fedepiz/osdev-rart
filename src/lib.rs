@@ -3,6 +3,7 @@
 #![feature(const_fn)]
 #![feature(asm)]
 #![feature(use_extern_macros)]
+#![feature(alloc)]
 #![no_std]
 extern crate rlibc;
 
@@ -14,6 +15,10 @@ extern crate spin;
 extern crate volatile;
 extern crate x86_64;
 
+//Allocator
+extern crate bump_allocator;
+#[macro_use]
+extern crate alloc;
 
 #[macro_use]
 mod vga_buffer;

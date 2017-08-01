@@ -15,6 +15,7 @@ pub const ENTRY_COUNT: usize = 512;
 pub type PhysicalAddress = usize;
 pub type VirtualAddress = usize;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Page {
     number: usize,
 }
@@ -60,5 +61,4 @@ pub fn test_paging<A>(allocator: &mut A) where A:FrameAllocator {
 
     page_table.unmap(Page::containing_address(addr), allocator);
     println!("None = {:?}", page_table.translate(addr));
-
 }

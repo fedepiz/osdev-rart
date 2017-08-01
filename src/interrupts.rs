@@ -1,11 +1,11 @@
 use x86_64::structures::idt::Idt;
 use x86_64::structures::idt::ExceptionStackFrame;
 
-use pic;
 lazy_static ! {
     static ref IDT: Idt = {
         let mut idt = Idt::new();
         idt.breakpoint.set_handler_fn(breakpoint_handler);
+        idt.interrupts[0].set_handler_fn(breakpoint_handler);
         idt
     };
 }

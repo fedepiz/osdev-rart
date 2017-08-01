@@ -30,7 +30,6 @@ extern crate alloc;
 #[macro_use]
 mod vga_buffer;
 mod memory;
-mod pic;
 mod interrupts;
 
 #[no_mangle]
@@ -45,10 +44,6 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     enable_write_protect_bit();
 
     memory::init(boot_info);
-
-    unsafe {
-        pic::initialize();
-    }
 
     use alloc::boxed::Box;
     {

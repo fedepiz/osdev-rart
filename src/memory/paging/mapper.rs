@@ -1,23 +1,25 @@
+use super::{VirtualAddress, PhysicalAddress, Page, ENTRY_COUNT};
+use super::entry::*;
+use memory::table::{self, Table, Level4, Level1};
+use memory::{PAGE_SIZE, Frame, FrameAllocator};
 use core::ptr::Unique;
-use memory::*;
-use memory::paging::*;
 
-pub struct ActivePageTable {
+pub struct Mapper {
     p4: Unique<Table<Level4>>,
 }
 
-impl ActivePageTable {
-    pub unsafe fn new() -> ActivePageTable {
-        ActivePageTable {
+impl Mapper {
+    pub unsafe fn new() -> Mapper {
+        Mapper {
             p4: Unique::new_unchecked(table::P4),
         }
     }
 
-    fn p4(&self) -> &Table<Level4> {
+    pub fn p4(&self) -> &Table<Level4> {
         unsafe { self.p4.as_ref() }
     }
 
-    fn p4_mut(&mut self) -> &mut Table<Level4> {
+    pub fn p4_mut(&mut self) -> &mut Table<Level4> {
         unsafe { self.p4.as_mut() }
     }
 
@@ -27,7 +29,7 @@ impl ActivePageTable {
             .map(|frame| frame.number * PAGE_SIZE + offset)
     }
 
-    fn translate_page(&self, page: Page) -> Option<Frame> {
+    pub fn translate_page(&self, page: Page) -> Option<Frame> {
         let p3 = self.p4().next_table(page.p4_index());
 
         let huge_page = || {
@@ -72,7 +74,6 @@ impl ActivePageTable {
                 let mut p3 = p4.next_table_create(page.p4_index(), allocator);
                 let mut p2 = p3.next_table_create(page.p3_index(), allocator);
                 let mut p1 = p2.next_table_create(page.p2_index(), allocator);
-
                 assert!(p1[page.p1_index()].is_unused());
                 p1[page.p1_index()].set(frame, flags | PRESENT);
         }

@@ -18,7 +18,8 @@ extern crate volatile;
 extern crate x86_64;
 
 //Allocator
-extern crate bump_allocator;
+//extern crate bump_allocator;
+extern crate hole_list_allocator;
 #[macro_use]
 extern crate alloc;
 

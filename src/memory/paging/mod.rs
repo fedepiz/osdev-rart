@@ -15,7 +15,7 @@ pub const ENTRY_COUNT: usize = 512;
 pub type PhysicalAddress = usize;
 pub type VirtualAddress = usize;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Page {
     number: usize,
 }
@@ -43,6 +43,32 @@ impl Page {
     }
     fn p1_index(&self) -> usize {
         (self.number >> 0) & 0o777
+    }
+
+    pub fn range_inclusive(start: Page, end: Page) -> PageIter {
+        PageIter {
+            start: start,
+            end: end,
+        }
+    }
+}
+
+pub struct PageIter {
+    start: Page,
+    end: Page,
+}
+
+impl Iterator for PageIter {
+    type Item = Page;
+
+    fn next(&mut self) -> Option<Page> {
+        if self.start <= self.end {
+            let page = self.start;
+            self.start.number += 1;
+            Some(page)
+        } else {
+            None
+        }
     }
 }
 
@@ -142,7 +168,7 @@ impl ActivePageTable {
 }
 
 use multiboot2::BootInformation;
-pub fn remap_the_kernel<A>(allocator: &mut A, boot_info: &BootInformation)
+pub fn remap_the_kernel<A>(allocator: &mut A, boot_info: &BootInformation) -> ActivePageTable
     where A: FrameAllocator {
         let mut temporary_page = TemporaryPage::new(
             Page {number: 0xcafebabe },
@@ -194,6 +220,8 @@ pub fn remap_the_kernel<A>(allocator: &mut A, boot_info: &BootInformation)
         );
         active_table.unmap(old_p4_page, allocator);
         println!("guard page placed at {:#x}", old_p4_page.start_address());
+
+        active_table
 }
 
 

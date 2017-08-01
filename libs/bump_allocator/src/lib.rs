@@ -1,8 +1,7 @@
 #![feature(const_fn)]
 #![feature(allocator_internals)]
-#![default_lib_allocator]
 #![no_std]
-
+#![default_lib_allocator]
 
 use spin::Mutex;
 
@@ -58,36 +57,18 @@ pub fn align_up(addr:usize, align: usize) -> usize {
 }
 
 #[no_mangle]
-pub extern fn __rust_allocate(size: usize, align: usize) -> *mut u8 {
+pub unsafe extern fn __rdl_alloc(size: usize,
+                                 align: usize,
+                                 err: *mut u8) -> *mut u8 {
     BUMP_ALLOCATOR.lock().allocate(size, align).expect("out of memory")
 }
-
 #[no_mangle]
-pub extern fn __rust_usable_size(size: usize, align: usize) -> usize {
-    size
+pub unsafe extern fn __rdl_oom(err: *const u8) -> ! {
+   panic!("OOm");
 }
 
 #[no_mangle]
-pub extern fn __rust_deallocate(ptr: *mut u8, size: usize, align: usize) {
-    //Leak
-}
-
-#[no_mangle]
-pub extern fn __rust_reallocate(ptr: *mut u8, size: usize, new_size: usize,
-                                align: usize) -> *mut u8 {
-    use core::{ptr, cmp};
-    // from: https://github.com/rust-lang/rust/blob/
-    //     c66d2380a810c9a2b3dbb4f93a830b101ee49cc2/
-    //     src/liballoc_system/lib.rs#L98-L101
-    let new_ptr = __rust_allocate(new_size, align);
-    unsafe { ptr::copy(ptr, new_ptr, cmp::min(size, new_size)) };
-    __rust_deallocate(ptr, size, align);
-    new_ptr
-}
-
-#[no_mangle]
-pub extern fn __rust_reallocate_inplace(ptr: *mut u8, size: usize,
-                                        new_size: usize, align: usize)
-                                        -> usize {
-    size
+pub unsafe extern fn __rdl_dealloc(ptr: *mut u8,
+                                   size: usize,
+                                   align: usize) {
 }

@@ -2,19 +2,23 @@
 #![feature(unique)]
 #![feature(const_fn)]
 #![feature(asm)]
+#![feature(use_extern_macros)]
 #![no_std]
 extern crate rlibc;
 
+#[macro_use]
+extern crate bitflags;
 extern crate cpuio;
 extern crate multiboot2;
 extern crate spin;
 extern crate volatile;
+extern crate x86_64;
 
-mod memory;
-mod pic;
+
 #[macro_use]
 mod vga_buffer;
-
+mod memory;
+mod pic;
 #[no_mangle]
 pub extern fn rust_main(multiboot_information_address: usize) {
     vga_buffer::clear_screen();
@@ -50,16 +54,14 @@ pub extern fn rust_main(multiboot_information_address: usize) {
         kernel_start as usize, kernel_end as usize, multiboot_start,
         multiboot_end, memory_map_tag.memory_areas());
 
-    for i in 0.. {
-        if let None = frame_allocator.allocate_frame() {
-            println!("allocated {} frames", i);
-            break;
-        }
-    }
+    memory::test_paging(&mut frame_allocator);
 
     unsafe {
         pic::initialize();
     }
+
+    println!("Initialization completed");
+
     loop{}
 }
 

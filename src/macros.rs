@@ -19,6 +19,6 @@ macro_rules! logln {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => ({
-        $crate::serial::log(format_args!($($arg)*));
+        $crate::devices::serial::log(format_args!($($arg)*));
     });
 }

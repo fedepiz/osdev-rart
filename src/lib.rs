@@ -5,6 +5,7 @@
 #![feature(use_extern_macros)]
 #![feature(alloc)]
 #![feature(abi_x86_interrupt)]
+#![feature(type_ascription)]
 #![no_std]
 extern crate rlibc;
 
@@ -33,7 +34,7 @@ mod memory;
 mod interrupts;
 mod port;
 mod pic;
-mod serial;
+mod devices;
 
 #[no_mangle]
 pub extern "C" fn rust_main(multiboot_information_address: usize) {
@@ -57,11 +58,12 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     println!("Initialization completed");
     unsafe {
         pic::initialize();
-        serial::initialize();
-        //x86_64::instructions::interrupts::enable();
+        devices::serial::initialize();
+        devices::pit::initialize();
+        x86_64::instructions::interrupts::enable();
     }
     logln!("Serial logging example {}", 42);
-    
+
     loop{}
 }
 

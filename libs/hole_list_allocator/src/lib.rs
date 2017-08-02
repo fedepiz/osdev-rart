@@ -43,5 +43,21 @@ pub unsafe extern fn __rdl_dealloc(ptr: *mut u8,
                                    size: usize,
                                    align: usize) {
     let layout = Layout::from_size_align(size, align).expect("Invalid layout");
-    unsafe { HEAP.lock().deallocate(ptr, layout) };
+    HEAP.lock().deallocate(ptr, layout);
+}
+
+#[no_mangle]
+pub unsafe extern fn __rdl_realloc(ptr: *mut u8,
+                                       old_size: usize,
+                                       old_align: usize,
+                                       new_size: usize,
+                                       new_align: usize,
+                                       err: *mut u8) -> *mut u8 {
+    use core::cmp;
+    let old_layout = Layout::from_size_align(old_size, old_align).expect("Invalid layout");
+    let new_layout = Layout::from_size_align(new_size, new_align).expect("Invalid layout");
+    let new_ptr = HEAP.lock().allocate_first_fit(new_layout).expect("Out of memory");
+    core::ptr::copy(ptr, new_ptr, cmp::min(old_size, new_size));
+    HEAP.lock().deallocate(ptr, old_layout);
+    new_ptr
 }

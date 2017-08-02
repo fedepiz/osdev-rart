@@ -58,10 +58,10 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     unsafe {
         pic::initialize();
         serial::initialize();
-        x86_64::instructions::interrupts::enable();
+        //x86_64::instructions::interrupts::enable();
     }
     logln!("Serial logging example {}", 42);
-
+    
     loop{}
 }
 

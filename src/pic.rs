@@ -70,7 +70,6 @@ pub unsafe fn initialize() {
     PICS.lock().remap();
 }
 
-
 pub unsafe fn signal_irq_done(int_no:u8) {
     PICS.lock().signal_irq_done(int_no);
 }

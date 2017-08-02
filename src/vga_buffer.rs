@@ -85,7 +85,7 @@ impl Writer {
     }
 
     fn back_one(&mut self) {
-        self.column_position = cmp::max(0, self.column_position-1);;
+        self.column_position = self.column_position.saturating_sub(1);
         self.write_byte(b' ');
         self.column_position = self.column_position-1;
     }

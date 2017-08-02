@@ -28,26 +28,15 @@ extern "x86-interrupt" fn double_fault_handler(stack_frame: &mut ExceptionStackF
 
 extern "x86-interrupt" fn pic_handler(stack_frame: &mut ExceptionStackFrame) {
     use devices::pit;
-    let mut handler = pit::PIT_HANDLER.lock();
-    let mut should_trigger = false;
-    {
-        let mut state = &mut handler.0;
-        if state.should_trigger() {
-            state.reset_killed_count();
-            should_trigger = true;
-        } else {
-            state.kill_tick();
-        }
-    }
-    if(should_trigger) {
-        (&handler.1)(&handler.0);
-    }
+    pit::handle();
     unsafe {
         pic::signal_irq_done(0);
     }
 }
 
 extern "x86-interrupt" fn keyboard_handler(stack_frame: &mut ExceptionStackFrame) {
+    use devices::keyboard;
+    keyboard::handle();
     unsafe {
         pic::signal_irq_done(1);
     }

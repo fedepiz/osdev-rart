@@ -52,14 +52,23 @@ impl PitHandlerState {
     }
 }
 
-fn default_handler(state: &PitHandlerState) {
-    println!("Triggered!");
+pub fn handle() {
+    let mut state = &mut PIT_HANDLER.lock();
+    if state.should_trigger() {
+        state.reset_killed_count();
+        handle_body();
+    } else {
+        state.kill_tick();
+    }
+}
+
+fn handle_body() {
+
 }
 
 
 static PIT:Mutex<Pit> = Mutex::new(unsafe { Pit::new() });
-pub static PIT_HANDLER:Mutex<(PitHandlerState, fn(&PitHandlerState) ->())> =
-    Mutex::new((PitHandlerState::new(1800), default_handler));
+static PIT_HANDLER:Mutex<PitHandlerState> =Mutex::new(PitHandlerState::new(1800));
 
 pub fn initialize() {
     PIT.lock().set_timer_phase(1000);

@@ -26,11 +26,14 @@ extern crate hole_list_allocator;
 extern crate lazy_static;
 #[macro_use]
 extern crate alloc;
-
 #[macro_use]
+mod macros;
 mod vga_buffer;
 mod memory;
 mod interrupts;
+mod port;
+mod pic;
+mod serial;
 
 #[no_mangle]
 pub extern "C" fn rust_main(multiboot_information_address: usize) {
@@ -51,8 +54,14 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     }
 
     interrupts::init();
-
     println!("Initialization completed");
+    unsafe {
+        pic::initialize();
+        serial::initialize();
+        x86_64::instructions::interrupts::enable();
+    }
+    logln!("Serial logging example {}", 42);
+
     loop{}
 }
 

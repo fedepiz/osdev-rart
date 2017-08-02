@@ -38,7 +38,7 @@ pub fn handle() {
 
 const KEYMAP_US_LOWER:[char; 90] = [
 '\0' as char,  27 as char, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
-'9', '0', '-', '=', '\u{2764}',	/* Backspace */
+'9', '0', '-', '=', '\x08',	/* Backspace */
 '\t',			/* Tab */
 'q', 'w', 'e', 'r',	/* 19 */
 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	/* Enter key */

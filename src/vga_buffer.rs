@@ -2,6 +2,7 @@ use spin::Mutex;
 use core::ptr::Unique;
 use volatile::Volatile;
 use core::fmt;
+use core::cmp;
 
 
 #[allow(dead_code)]
@@ -60,6 +61,7 @@ impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
+            b'\x08' => self.back_one(),
             byte => {
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line();
@@ -80,6 +82,12 @@ impl Writer {
 
     fn buffer(&mut self) -> &mut Buffer {
         unsafe {self.buffer.as_mut()}
+    }
+
+    fn back_one(&mut self) {
+        self.column_position = cmp::max(0, self.column_position-1);;
+        self.write_byte(b' ');
+        self.column_position = self.column_position-1;
     }
 
     fn new_line(&mut self) {
